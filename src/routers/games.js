@@ -18,8 +18,8 @@ const getOAuthToken = async () => {
       null,
       {
         params: {
-          client_id: process.env.CLIENT_ID,
-          client_secret: process.env.CLIENT_SECRET,
+          client_id: "op4t4c4ib8aniup20jw6ul407kxf5w",
+          client_secret: "ifgm79fq2c4mtblqarcs8srzr2gdcz",
           grant_type: "client_credentials",
         },
       }
@@ -91,7 +91,7 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Client-ID": process.env.CLIENT_ID,
+          "Client-ID": op4t4c4ib8aniup20jw6ul407kxf5w,
           Accept: "application/json",
         },
       }
@@ -157,7 +157,7 @@ const fetchGames = async (offset = 0, userId = null) => {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Client-ID": process.env.CLIENT_ID,
+          "Client-ID": "op4t4c4ib8aniup20jw6ul407kxf5w",
           Accept: "application/json",
         },
       }
@@ -213,7 +213,7 @@ const searchGames = async (search, offset) => {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Client-ID": process.env.CLIENT_ID,
+          "Client-ID": op4t4c4ib8aniup20jw6ul407kxf5w,
           Accept: "application/json",
         },
       }
@@ -254,7 +254,7 @@ const upcomingGames = async (offset = 0, userId = null) => {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Client-ID": process.env.CLIENT_ID,
+          "Client-ID": op4t4c4ib8aniup20jw6ul407kxf5w,
           Accept: "application/json",
         },
       }
@@ -303,7 +303,7 @@ const gameDetails = async (gameId) => {
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Client-ID": process.env.CLIENT_ID,
+        "Client-ID": op4t4c4ib8aniup20jw6ul407kxf5w,
         Accept: "application/json",
       },
     }
@@ -355,7 +355,7 @@ const gameGenres = async () => {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Client-ID": process.env.CLIENT_ID,
+        "Client-ID": op4t4c4ib8aniup20jw6ul407kxf5w,
         "Content-Type": "text/plain",
       },
       body: requestBody,
@@ -390,7 +390,7 @@ const gameThemes = async () => {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Client-ID": process.env.CLIENT_ID,
+        "Client-ID": op4t4c4ib8aniup20jw6ul407kxf5w,
         "Content-Type": "text/plain",
       },
       body: requestBody,

@@ -13,7 +13,7 @@ sequelize
   .then(() => console.log("✅ Veritabanı bağlantısı başarılı."))
   .catch((err) => console.error("❌ Bağlantı hatası:", err));
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 app.listen(PORT, () => console.log(`🚀 Sunucu ${PORT} portunda çalışıyor`));
 
 module.exports = app;

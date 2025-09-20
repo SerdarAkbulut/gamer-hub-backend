@@ -23,9 +23,13 @@ const upload = multer({ storage: multer.memoryStorage() });
 const FormData = require("form-data");
 
 const generateResetToken = (userId) => {
-  const resetToken = jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  }); // 1 saat geçerli
+  const resetToken = jwt.sign(
+    { userId },
+    "ad54c523b06043026b7b213c919fa86affbc730a2694f94bd8442bc1a55ad584cec615b6651ee2319b2b9ca8fc3cfd441aea25e8a97b13512f9d95f5216f51e0",
+    {
+      expiresIn: "1h",
+    }
+  ); // 1 saat geçerli
   return resetToken;
 };
 const generateResetLink = (token) => {
@@ -33,7 +37,10 @@ const generateResetLink = (token) => {
 };
 const verifyResetToken = (token) => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET); // Token geçerli mi?
+    return jwt.verify(
+      token,
+      "ad54c523b06043026b7b213c919fa86affbc730a2694f94bd8442bc1a55ad584cec615b6651ee2319b2b9ca8fc3cfd441aea25e8a97b13512f9d95f5216f51e0"
+    ); // Token geçerli mi?
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       return { error: "Bu bağlantının süresi dolmuş. Lütfen tekrar deneyin." };
@@ -116,7 +123,7 @@ router.post("/login", async (req, res) => {
     }
 
     const payload = { id: user.id, email: user.email };
-    const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, {
+    const token = jwt.sign(payload, "fb715973770b7d2093581ba055502c48", {
       // .env'den al
       expiresIn: "30d",
     });
@@ -197,14 +204,14 @@ router.post("/forgot-password", async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAILJS_USER,
-        pass: process.env.EMAILJS_PASSWORD,
+        user: "serdar61of@gmail.com",
+        pass: "mozh esvh cywm xtaq",
       },
     });
 
     // Mail gönderme ayarları
     const mailOptions = {
-      from: process.env.EMAILJS_USER,
+      from: "serdar61of@gmail.com",
       to: email,
       subject: "Şifre Sıfırlama",
       text: `Şifrenizi sıfırlamak için şu bağlantıya tıklayın: ${resetLink}`,
@@ -257,7 +264,10 @@ router.post("/reset-password", async (req, res) => {
 router.get("/check-reset-password-token/:token", async (req, res) => {
   try {
     const { token } = req.params;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      "ad54c523b06043026b7b213c919fa86affbc730a2694f94bd8442bc1a55ad584cec615b6651ee2319b2b9ca8fc3cfd441aea25e8a97b13512f9d95f5216f51e0"
+    );
 
     res.status(200).json({ valid: true, userId: decoded.userId });
   } catch (error) {
@@ -270,9 +280,9 @@ router.get("/check-reset-password-token/:token", async (req, res) => {
 });
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: "dew08olkl",
+  api_key: "512792765414571",
+  api_secret: "yEcOLqzm17rH5P8r_LZxKugt9x8",
 });
 
 router.post("/upload-image", auth, upload.single("file"), async (req, res) => {

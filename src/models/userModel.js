@@ -7,7 +7,7 @@ class User extends Model {
   createAuthToken() {
     return jwt.sign(
       { id: this.id, isAdmin: this.isAdmin },
-      process.env.JWT_PRIVATE_KEY,
+      "fb715973770b7d2093581ba055502c48",
       {
         expiresIn: "30d",
       }

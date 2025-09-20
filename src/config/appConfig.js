@@ -1,7 +1,8 @@
 require("dotenv").config();
 
 module.exports = {
-  port: process.env.PORT || 3000,
-  jwtSecret: process.env.JWT_SECRET || "default_secret",
-  apiBaseUrl: process.env.API_BASE_URL || "http://localhost:3000",
+  port: 3000,
+  jwtSecret: "default_secret",
+  apiBaseUrl:
+    "https://project-i8gcter4r-serdar61of-gmailcoms-projects.vercel.app/",
 };
