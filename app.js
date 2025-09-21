@@ -8,21 +8,23 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("✅ PostgreSQL bağlantısı başarılı.");
-  })
-  .catch((err) => {
-    console.error("❌ PostgreSQL bağlantı hatası:", err);
-  });
+// Routerları buraya ekle
+// app.use("/api/users", users);
 
 app.get("/", (req, res) => {
   res.json({ message: "🚀 API çalışıyor!", baseUrl: config.apiBaseUrl });
 });
 
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Merhaba dünya!", port: config.port });
+app.get("/api/hello", async (req, res) => {
+  try {
+    // İsteğe bağlı olarak request bazlı bağlantı kontrolü
+    await sequelize.authenticate();
+    res.json({ message: "Merhaba dünya!", port: config.port });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Database bağlantısı başarısız", details: err.message });
+  }
 });
 
 module.exports = app;
