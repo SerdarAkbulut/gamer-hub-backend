@@ -1,6 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const sequelize = require("./src/startup/db.js");
+const sequelize = require("./src/config/db.js");
 require("./src/models/index.js");
 
 dotenv.config();
