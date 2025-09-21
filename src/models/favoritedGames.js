@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../startup/db");
+const sequelize = require("../config/db");
 const favoritedGames = sequelize.define("favoritedGames", {
   gameId: {
     type: DataTypes.INTEGER,

@@ -1,4 +1,4 @@
-const sequelize = require("../startup/db");
+const sequelize = require("../config/db");
 const { User } = require("./userModel");
 const favoritedGames = require("./favoritedGames");
 const LikedGames = require("./likedGames");

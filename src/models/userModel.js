@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require("sequelize");
-const sequelize = require("../startup/db");
+const sequelize = require("../config/db");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 

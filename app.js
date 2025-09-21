@@ -1,27 +1,34 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const sequelize = require("./src/config/db");
+const config = require("./src/config/appConfig");
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
-// Basit test endpoint
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("✅ PostgreSQL bağlantısı başarılı.");
+  })
+  .catch((err) => {
+    console.error("❌ PostgreSQL bağlantı hatası:", err);
+  });
+
 app.get("/", (req, res) => {
-  res.json({ message: "🚀 API çalışıyor!" });
+  res.json({ message: "🚀 API çalışıyor!", baseUrl: config.apiBaseUrl });
 });
 
-// Örnek başka endpoint
 app.get("/api/hello", (req, res) => {
-  res.json({ message: "Merhaba dünya!" });
+  res.json({ message: "Merhaba dünya!", port: config.port });
 });
 
-// Vercel için export
 module.exports = app;
 
-// Local development için port açma
 if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || config.port;
   app.listen(PORT, () => {
     console.log(`✅ Server http://localhost:${PORT} adresinde çalışıyor`);
   });
