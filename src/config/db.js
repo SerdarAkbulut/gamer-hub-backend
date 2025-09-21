@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const sequelize = require("../config/db"); // db.js dosyan buraya import ediliyor
-const config = require("../config/appConfig"); // config.js dosyan buraya import ediliyor
+const sequelize = require("../config/db");
+const config = require("../config/appConfig");
 
 dotenv.config();
 
