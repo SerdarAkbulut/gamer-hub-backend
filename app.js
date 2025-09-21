@@ -1,19 +1,28 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const sequelize = require("./src/config/db.js");
-require("./src/models/index.js");
 
 dotenv.config();
+
 const app = express();
 app.use(express.json());
-require("./src/startup/routers")(app);
 
-sequelize
-  .authenticate()
-  .then(() => console.log("✅ Veritabanı bağlantısı başarılı."))
-  .catch((err) => console.error("❌ Bağlantı hatası:", err));
+// Basit test endpoint
+app.get("/", (req, res) => {
+  res.json({ message: "🚀 API çalışıyor!" });
+});
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Sunucu ${PORT} portunda çalışıyor`));
+// Örnek başka endpoint
+app.get("/api/hello", (req, res) => {
+  res.json({ message: "Merhaba dünya!" });
+});
 
+// Vercel için export
 module.exports = app;
+
+// Local development için port açma
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`✅ Server http://localhost:${PORT} adresinde çalışıyor`);
+  });
+}
