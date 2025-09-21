@@ -28,7 +28,7 @@ app.get("/api/hello", (req, res) => {
 module.exports = app;
 
 if (require.main === module) {
-  const PORT = process.env.PORT || config.port;
+  const PORT = config.port;
   app.listen(PORT, () => {
     console.log(`✅ Server http://localhost:${PORT} adresinde çalışıyor`);
   });
