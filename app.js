@@ -3,10 +3,12 @@ const cors = require("cors");
 const sequelize = require("./src/config/db");
 const config = require("./src/config/appConfig");
 const gamesRoutes = require("./src/routes/games");
+const favoritedRoutes = require("./src/routes/favorited");
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api", gamesRoutes);
+app.use("/api", favoritedRoutes);
 app.get("/", (req, res) => {
   res.json({ message: "🚀 API çalışıyor!", baseUrl: config.apiBaseUrl });
 });
