@@ -1,11 +1,11 @@
-// const express = require("express");
+const express = require("express");
 // const dotenv = require("dotenv");
 // const sequelize = require("./src/startup/db.js");
 // require("./src/models/index.js");
 
 // dotenv.config();
-// const app = express();
-// app.use(express.json());
+const app = express();
+app.use(express.json());
 // require("./src/startup/routers")(app);
 
 // sequelize
