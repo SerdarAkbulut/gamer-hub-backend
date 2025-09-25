@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const auth = require("../middleware/auth");
+const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
 const FormData = require("form-data");
 const {

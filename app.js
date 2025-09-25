@@ -7,6 +7,7 @@ const favoritedRoutes = require("./src/routes/favorited");
 const likedGames = require("./src/routes/liked");
 const post = require("./src/routes/post");
 const follow = require("./src/routes/follow");
+const user = require("./src/routes/user");
 const app = express();
 const modelIndex = require("./src/models/index");
 app.use(cors());
@@ -16,6 +17,7 @@ app.use("/api", favoritedRoutes);
 app.use("/api", likedGames);
 app.use("/api", post);
 app.use("/api", follow);
+app.use("/api", user);
 app.get("/", (req, res) => {
   res.json({ message: "🚀 API çalışıyor!", baseUrl: config.apiBaseUrl });
 });
