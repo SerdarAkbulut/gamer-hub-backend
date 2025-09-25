@@ -1,4 +1,6 @@
 const axios = require("axios");
+const Post = require("../models/postModel");
+const { User } = require("../models/userModel");
 const getOAuthToken = async () => {
   try {
     const response = await axios.post(
@@ -65,7 +67,6 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
       fields name, cover.image_id, first_release_date;
       sort first_release_date desc;
       where first_release_date < ${currentTime} 
-      & platforms = (6, 48, 167, 9, 49, 169, 12)
       & category = (0)
       & version_parent = null
       & themes !=(42);
@@ -112,7 +113,13 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
       });
     }
 
-    return games;
+    return (games = games.map((game) => {
+      return {
+        ...game,
+        isLiked: null,
+        isFavorited: false,
+      };
+    }));
   } catch (error) {
     console.error("Error:", error.message);
     return [];
@@ -129,12 +136,9 @@ const fetchGames = async (offset = 0, userId = null) => {
 
     const requestBody = `
       fields name,  cover.image_id; 
-      sort total_rating_count desc ;
-      where first_release_date <= ${currentTime} 
-      & platforms = (6, 48, 167, 9, 49, 169, 12)
-      & category = (0)
-      & version_parent = null
-      & themes !=(42);
+      sort rating desc ;
+      where first_release_date <= ${currentTime} ;
+  
       limit 24;
       offset ${offset};
     `;
@@ -175,7 +179,13 @@ const fetchGames = async (offset = 0, userId = null) => {
       });
     }
 
-    return games;
+    return (games = games.map((game) => {
+      return {
+        ...game,
+        isLiked: null,
+        isFavorited: false,
+      };
+    }));
   } catch (error) {
     console.error("Error:", error.message);
     return [];
@@ -193,7 +203,7 @@ const searchGames = async (search, offset) => {
     search "${search}";
     limit 24;
    offset ${offset}; 
-   where category=0;`;
+  `;
 
     const response = await axios.post(
       "https://api.igdb.com/v4/games",
@@ -210,7 +220,7 @@ const searchGames = async (search, offset) => {
       ...game,
       cover_url: game.cover
         ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.cover.image_id}.jpg`
-        : "default-cover.jpg", // Varsayılan kapak resmi
+        : "default-cover.jpg",
     }));
     return games;
   } catch (error) {

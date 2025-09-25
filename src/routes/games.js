@@ -1,7 +1,4 @@
 const optionalAuth = require("../middleware/optionalAuth ");
-
-const { Router } = require("express");
-const router = Router();
 const {
   fetchGames,
   fetchReleaseDates,
@@ -11,13 +8,16 @@ const {
   searchGames,
   upcomingGames,
 } = require("../controllers/gamesController");
-router.get("/games", optionalAuth, async (req, res) => {
+const { Router } = require("express");
+const router = Router();
+
+router.get("/games", async (req, res) => {
   try {
-    const user = req.user; // Kullanıcı bilgisi (eğer varsa)
+    const user = req.user;
     const page = parseInt(req.query.page) || 1;
 
     const offset = (page - 1) * 24;
-    const games = await fetchGames(offset, user ? user.id : null); // Eğer user varsa id'yi geçiyoruz, yoksa null
+    const games = await fetchGames(offset, user ? user.id : null);
     res.json(games);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -63,23 +63,23 @@ router.get("/gameThemes", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/newestGames", optionalAuth, async (req, res) => {
+router.get("/newestGames", async (req, res) => {
   try {
-    const user = req.user; // Kullanıcı bilgisi (eğer varsa)
+    const user = req.user;
     const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * 24;
-    const games = await fetchReleaseDates(offset, user ? user.id : null); // Eğer user varsa id'yi geçiyoruz, yoksa null
+    const games = await fetchReleaseDates(offset, user ? user.id : null);
     res.json(games);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/upcomingGames", optionalAuth, async (req, res) => {
+router.get("/upcomingGames", async (req, res) => {
   try {
-    const user = req.user; // Kullanıcı bilgisi (eğer varsa)
+    const user = req.user;
     const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * 24;
-    const games = await upcomingGames(offset, user ? user.id : null); // Eğer user varsa id'yi geçiyoruz, yoksa null
+    const games = await upcomingGames(offset, user ? user.id : null);
     res.json(games);
   } catch (error) {
     console.error("Error:", error.message);
