@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-
+require("dotenv").config();
 const auth = (req, res, next) => {
   const authHeader = req.header("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -8,7 +8,7 @@ const auth = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
   try {
-    const decodedToken = jwt.verify(token, "fb715973770b7d2093581ba055502c48");
+    const decodedToken = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
     req.user = decodedToken;
     next();
   } catch (error) {

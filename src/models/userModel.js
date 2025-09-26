@@ -40,7 +40,7 @@ User.init(
       allowNull: true,
     },
   },
-  { sequelize, modelName: "Users" } // Model adı tekil olmalı
+  { sequelize, modelName: "Users" }
 );
 
 function validateRegister(user) {

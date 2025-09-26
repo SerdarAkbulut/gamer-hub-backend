@@ -1,5 +1,5 @@
 const { where } = require("sequelize");
-const FavoriGames = require("../models/favoriGames");
+const FavoriGames = require("../models/favoritedGames");
 const { User } = require("../models/userModel");
 
 const addOrUpdateFavoriGame = async (req, res) => {

@@ -1,4 +1,7 @@
 const axios = require("axios");
+const Post = require("../models/postModel");
+const { User } = require("../models/userModel");
+const { LikedGames, favoritedGames } = require("../models");
 const getOAuthToken = async () => {
   try {
     const response = await axios.post(
@@ -23,7 +26,7 @@ const getOAuthToken = async () => {
   }
 };
 const getUserLikedGames = async (userId) => {
-  return await likedGames.findAll({
+  return await LikedGames.findAll({
     where: {
       userId: userId,
     },
@@ -55,9 +58,7 @@ const getUserFavoritedGames = async (userId) => {
 const fetchReleaseDates = async (offset = 0, userId = null) => {
   try {
     const accessToken = await getOAuthToken();
-    if (!accessToken) {
-      throw new Error("Access token alınamadı!");
-    }
+    if (!accessToken) throw new Error("Access token alınamadı!");
 
     const currentTime = Math.floor(Date.now() / 1000);
 
@@ -65,7 +66,6 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
       fields name, cover.image_id, first_release_date;
       sort first_release_date desc;
       where first_release_date < ${currentTime} 
-      & platforms = (6, 48, 167, 9, 49, 169, 12)
       & category = (0)
       & version_parent = null
       & themes !=(42);
@@ -95,10 +95,10 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
         : "default-cover.jpg",
     }));
 
-    // Eğer kullanıcı giriş yapmışsa, onun beğendiği ve favori oyunlarını ekle
     if (userId) {
       const likedGames = await getUserLikedGames(userId);
       const favoritedGames = await getUserFavoritedGames(userId);
+
       games = games.map((game) => {
         const likedGame = likedGames.find((lg) => lg.gameId === game.id);
         const favoritedGame = favoritedGames.find(
@@ -110,6 +110,13 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
           isFavorited: favoritedGame ? favoritedGame.isFavorited : false,
         };
       });
+    } else {
+      // userId yoksa default değerleri ata
+      games = games.map((game) => ({
+        ...game,
+        isLiked: null,
+        isFavorited: false,
+      }));
     }
 
     return games;
@@ -122,19 +129,13 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
 const fetchGames = async (offset = 0, userId = null) => {
   try {
     const accessToken = await getOAuthToken();
-    if (!accessToken) {
-      throw new Error("Access token alınamadı!");
-    }
-    const currentTime = Math.floor(Date.now() / 1000);
+    if (!accessToken) throw new Error("Access token alınamadı!");
 
+    const currentTime = Math.floor(Date.now() / 1000);
     const requestBody = `
-      fields name,  cover.image_id; 
-      sort total_rating_count desc ;
-      where first_release_date <= ${currentTime} 
-      & platforms = (6, 48, 167, 9, 49, 169, 12)
-      & category = (0)
-      & version_parent = null
-      & themes !=(42);
+      fields name, cover.image_id; 
+      sort rating desc;
+      where first_release_date <= ${currentTime};
       limit 24;
       offset ${offset};
     `;
@@ -158,10 +159,10 @@ const fetchGames = async (offset = 0, userId = null) => {
         : "default-cover.jpg",
     }));
 
-    // Eğer kullanıcı giriş yapmışsa, onun beğendiği ve favori oyunlarını ekle
     if (userId) {
       const likedGames = await getUserLikedGames(userId);
       const favoritedGames = await getUserFavoritedGames(userId);
+
       games = games.map((game) => {
         const likedGame = likedGames.find((lg) => lg.gameId === game.id);
         const favoritedGame = favoritedGames.find(
@@ -171,8 +172,16 @@ const fetchGames = async (offset = 0, userId = null) => {
           ...game,
           isLiked: likedGame ? likedGame.isLiked : null,
           isFavorited: favoritedGame ? favoritedGame.isFavorited : false,
+          userId: userId,
         };
       });
+    } else {
+      games = games.map((game) => ({
+        ...game,
+        isLiked: null,
+        isFavorited: false,
+        userId: userId,
+      }));
     }
 
     return games;
@@ -182,18 +191,19 @@ const fetchGames = async (offset = 0, userId = null) => {
   }
 };
 
-const searchGames = async (search, offset) => {
+const searchGames = async (search, offset = 0, userId = null) => {
   try {
     const accessToken = await getOAuthToken();
     if (!accessToken) {
       throw new Error("Access token alınamadı!");
     }
 
-    const requestBody = `fields name, genres.name, first_release_date, cover.url,cover.image_id;
-    search "${search}";
-    limit 24;
-   offset ${offset}; 
-   where category=0;`;
+    const requestBody = `
+      fields name, genres.name, first_release_date, cover.url, cover.image_id;
+      search "${search}";
+      limit 24;
+      offset ${offset}; 
+    `;
 
     const response = await axios.post(
       "https://api.igdb.com/v4/games",
@@ -206,12 +216,39 @@ const searchGames = async (search, offset) => {
         },
       }
     );
+
     let games = response.data.map((game) => ({
       ...game,
       cover_url: game.cover
         ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.cover.image_id}.jpg`
-        : "default-cover.jpg", // Varsayılan kapak resmi
+        : "default-cover.jpg",
     }));
+
+    if (userId) {
+      const likedGames = await getUserLikedGames(userId);
+      const favoritedGames = await getUserFavoritedGames(userId);
+
+      games = games.map((game) => {
+        const likedGame = likedGames.find((lg) => lg.gameId === game.id);
+        const favoritedGame = favoritedGames.find(
+          (fv) => fv.gameId === game.id
+        );
+        return {
+          ...game,
+          isLiked: likedGame ? likedGame.isLiked : null,
+          isFavorited: favoritedGame ? favoritedGame.isFavorited : false,
+          userId: userId,
+        };
+      });
+    } else {
+      games = games.map((game) => ({
+        ...game,
+        isLiked: null,
+        isFavorited: false,
+        userId: userId,
+      }));
+    }
+
     return games;
   } catch (error) {
     console.error("Error Response Data:", error.response?.data);
@@ -222,6 +259,8 @@ const searchGames = async (search, offset) => {
 const upcomingGames = async (offset = 0, userId = null) => {
   try {
     const accessToken = await getOAuthToken();
+    if (!accessToken) throw new Error("Access token alınamadı!");
+
     const currentTime = Math.floor(Date.now() / 1000);
 
     const requestBody = `
@@ -255,10 +294,11 @@ const upcomingGames = async (offset = 0, userId = null) => {
         : "default-cover.jpg",
     }));
 
-    // Eğer kullanıcı giriş yapmışsa, onun beğendiği ve favori oyunlarını ekle
+    // Kullanıcı giriş yapmışsa beğenileri ve favorileri ekle
     if (userId) {
       const likedGames = await getUserLikedGames(userId);
       const favoritedGames = await getUserFavoritedGames(userId);
+
       games = games.map((game) => {
         const likedGame = likedGames.find((lg) => lg.gameId === game.id);
         const favoritedGame = favoritedGames.find(
@@ -270,6 +310,13 @@ const upcomingGames = async (offset = 0, userId = null) => {
           isFavorited: favoritedGame ? favoritedGame.isFavorited : false,
         };
       });
+    } else {
+      // userId yoksa default değerleri ata
+      games = games.map((game) => ({
+        ...game,
+        isLiked: null,
+        isFavorited: false,
+      }));
     }
 
     return games;
@@ -396,7 +443,119 @@ const gameThemes = async () => {
     return [];
   }
 };
+const getUserLikedGamesWithDetails = async (userId) => {
+  try {
+    const likedGames = await getUserLikedGames(userId);
 
+    if (!likedGames || likedGames.length === 0) {
+      return [];
+    }
+
+    const likedGameIds = likedGames
+      .filter((lg) => lg.isLiked)
+      .map((lg) => lg.gameId);
+
+    if (likedGameIds.length === 0) {
+      return [];
+    }
+
+    const accessToken = await getOAuthToken();
+    if (!accessToken) throw new Error("Access token alınamadı!");
+
+    const requestBody = `
+      fields id, name, cover.image_id; 
+      where id = (${likedGameIds.join(",")});
+      limit ${likedGameIds.length};
+    `;
+
+    const response = await axios.post(
+      "https://api.igdb.com/v4/games",
+      requestBody,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Client-ID": process.env.CLIENT_ID,
+          Accept: "application/json",
+        },
+      }
+    );
+
+    const games = response.data.map((game) => ({
+      ...game,
+      cover_url: game.cover
+        ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.cover.image_id}.jpg`
+        : "default-cover.jpg",
+      isLiked: true, // çünkü zaten liked
+      userId,
+    }));
+
+    return games;
+  } catch (error) {
+    console.error("Error getUserLikedGamesWithDetails:", error.message);
+    return [];
+  }
+};
+const getUserFavoritedGamesWithDetails = async (userId) => {
+  try {
+    const accessToken = await getOAuthToken();
+    if (!accessToken) throw new Error("Access token alınamadı!");
+
+    // Kullanıcının favori oyunlarını DB'den çek
+    const favoritedGames = await getUserFavoritedGames(userId);
+    const favoritedGameIds = favoritedGames
+      .filter((fv) => fv.isFavorited) // sadece favoriler
+      .map((fv) => fv.gameId);
+
+    if (favoritedGameIds.length === 0) {
+      return []; // Favori oyun yoksa boş dön
+    }
+
+    // IGDB'den sadece bu oyunları çek
+    const requestBody = `
+      fields name, cover.image_id, first_release_date, rating; 
+      where id = (${favoritedGameIds.join(",")});
+      limit ${favoritedGameIds.length};
+    `;
+
+    const response = await axios.post(
+      "https://api.igdb.com/v4/games",
+      requestBody,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Client-ID": process.env.CLIENT_ID,
+          Accept: "application/json",
+        },
+      }
+    );
+
+    // IGDB verilerini düzenle
+    let games = response.data.map((game) => ({
+      ...game,
+      cover_url: game.cover
+        ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.cover.image_id}.jpg`
+        : "default-cover.jpg",
+      isFavorited: true,
+      isLiked: false,
+      userId: userId,
+    }));
+
+    // Kullanıcının beğendiği oyunlarla eşleştir
+    const likedGames = await getUserLikedGames(userId);
+    games = games.map((game) => {
+      const liked = likedGames.find((lg) => lg.gameId === game.id);
+      return {
+        ...game,
+        isLiked: liked ? liked.isLiked : false,
+      };
+    });
+
+    return games;
+  } catch (error) {
+    console.error("Error getUserFavoritedGamesWithDetails:", error.message);
+    return [];
+  }
+};
 exports.games = {
   fetchGames,
   searchGames,
@@ -405,6 +564,10 @@ exports.games = {
   gameThemes,
   fetchReleaseDates,
   upcomingGames,
+  getUserLikedGames,
+  getUserFavoritedGames,
+  getUserLikedGamesWithDetails,
+  getUserFavoritedGamesWithDetails,
 };
 module.exports = {
   fetchGames,
@@ -414,4 +577,8 @@ module.exports = {
   gameThemes,
   fetchReleaseDates,
   upcomingGames,
+  getUserLikedGames,
+  getUserFavoritedGames,
+  getUserLikedGamesWithDetails,
+  getUserFavoritedGamesWithDetails,
 };
