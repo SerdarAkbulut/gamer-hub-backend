@@ -23,7 +23,7 @@ router.post("/addSavePost", auth, addSavePost);
 router.post("/comment", auth, addComment);
 router.post("/featurePost", auth, addFeaturePosts);
 router.get("/postList", getPostList);
-router.get("/postDetails", getPostDetails);
+router.get("/postDetails/:postId", getPostDetails);
 router.get("/favoriGame/postList", auth, getFavoriGamesPostList);
 router.get("/userPosts/:userId", getUserPosts);
 router.get("/myPosts", getMyPosts);

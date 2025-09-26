@@ -17,7 +17,7 @@ const router = Router();
 
 router.post("/register", register);
 router.post("/login", login);
-router.get("/user/:userId", getUserDetails);
+router.get("/user/:id", getUserDetails);
 router.put("/user", auth, updateUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);

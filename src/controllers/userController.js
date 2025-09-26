@@ -119,35 +119,44 @@ const register = async (req, res) => {
 };
 
 const getUserDetails = async (req, res) => {
-  const { id } = req.params;
-  const loggedInUserId = req.user ? req.user.id : null;
+  try {
+    const { id } = req.params; // await kaldırıldı
+    const loggedInUserId = req.user ? req.user.id : null;
 
-  let user = await User.findOne({
-    where: {
-      id: id,
-    },
-    attributes: ["userName", "id", "banner"],
-  });
+    if (!id) {
+      return res.status(400).json({ error: "Kullanıcı ID parametresi eksik!" });
+    }
 
-  if (!user) {
-    return res.status(404).send("Kullanıcı Bulunamadı");
-  }
-
-  let isFollowing = false;
-  if (loggedInUserId) {
-    const follow = await Follow.findOne({
+    const user = await User.findOne({
       where: {
-        followerId: loggedInUserId,
-        followingId: id,
+        id: parseInt(id, 10), // string'i integer'a çevir
       },
+      attributes: ["userName", "id", "banner"],
     });
-    isFollowing = follow ? true : false;
-  }
 
-  return res.status(200).json({
-    user,
-    isFollowing,
-  });
+    if (!user) {
+      return res.status(404).send("Kullanıcı Bulunamadı");
+    }
+
+    let isFollowing = false;
+    if (loggedInUserId) {
+      const follow = await Follow.findOne({
+        where: {
+          followerId: loggedInUserId,
+          followingId: parseInt(id, 10),
+        },
+      });
+      isFollowing = !!follow; // true/false
+    }
+
+    return res.status(200).json({
+      user,
+      isFollowing,
+    });
+  } catch (err) {
+    console.error("getUserDetails error:", err);
+    return res.status(500).json({ error: "Sunucu hatası" });
+  }
 };
 const login = async (req, res) => {
   try {

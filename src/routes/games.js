@@ -6,12 +6,14 @@ const {
   gameThemes,
   searchGames,
   upcomingGames,
+  getUserLikedGamesWithDetails,
+  getUserFavoritedGamesWithDetails,
 } = require("../controllers/gamesController");
 const { Router } = require("express");
-const auth = require("../middleware/auth");
+const optionalAuth = require("../middleware/optionalAuth ");
 const router = Router();
 
-router.get("/games", auth, async (req, res) => {
+router.get("/games", optionalAuth, async (req, res) => {
   try {
     const user = req.user;
     const page = parseInt(req.query.page) || 1;
@@ -23,8 +25,9 @@ router.get("/games", auth, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/search", auth, async (req, res) => {
+router.get("/search", optionalAuth, async (req, res) => {
   try {
+    const user = req.user;
     const searchQuery = req.query.q;
     const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * 24;
@@ -32,13 +35,13 @@ router.get("/search", auth, async (req, res) => {
       return res.status(400).json({ error: "Arama terimi belirtilmelidir!" });
     }
 
-    const games = await searchGames(searchQuery, offset);
+    const games = await searchGames(searchQuery, offset, user ? user.id : null);
     return res.json(games);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/gameDetails", auth, async (req, res) => {
+router.get("/gameDetails", optionalAuth, async (req, res) => {
   try {
     const gameId = req.query.id;
     const games = await gameDetails(gameId);
@@ -63,7 +66,7 @@ router.get("/gameThemes", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/newestGames", auth, async (req, res) => {
+router.get("/newestGames", optionalAuth, async (req, res) => {
   try {
     const user = req.user;
     const page = parseInt(req.query.page) || 1;
@@ -74,7 +77,7 @@ router.get("/newestGames", auth, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/upcomingGames", auth, async (req, res) => {
+router.get("/upcomingGames", optionalAuth, async (req, res) => {
   try {
     const user = req.user;
     const page = parseInt(req.query.page) || 1;
@@ -86,4 +89,14 @@ router.get("/upcomingGames", auth, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+router.get("/userLikedGames/:userId", optionalAuth, async (req, res) => {
+  const { userId } = req.params;
+  const games = await getUserLikedGamesWithDetails(userId);
+  res.json(games);
+});
 module.exports = router;
+router.get("/userFavoritedGames/:userId", optionalAuth, async (req, res) => {
+  const { userId } = req.params;
+  const games = await getUserFavoritedGamesWithDetails(userId);
+  res.json(games);
+});

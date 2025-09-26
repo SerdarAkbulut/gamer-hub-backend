@@ -2,6 +2,7 @@ const Post = require("../models/postModel");
 const { User } = require("../models/userModel");
 const SavedPost = require("../models/savedPost");
 const UserPostFeatured = require("../models/UserPostFeatured");
+const { replyPost } = require("../models");
 
 const addPost = async (req, res) => {
   try {
