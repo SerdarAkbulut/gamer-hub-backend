@@ -13,13 +13,12 @@ const addOrUpdateLikedGame = async (req, res) => {
     if (!gameId || !gameName || !gameImage || isLiked === undefined) {
       return res.status(400).json({ message: "Tüm alanlar zorunludur!" });
     }
-    // Kullanıcının bu oyun için beğeni kaydı var mı kontrol et
+
     const existingLike = await LikedGames.findOne({
       where: { gameId, userId: user.id },
     });
     if (existingLike) {
       if (existingLike.isLiked === isLiked) {
-        // Eğer aynı değer geldiyse `isLiked: null` olarak güncelle
         existingLike.isLiked = null;
         await existingLike.save();
         return res.status(200).json({
@@ -27,7 +26,6 @@ const addOrUpdateLikedGame = async (req, res) => {
           likedGame: existingLike,
         });
       } else {
-        // Eğer farklı bir değer geldiyse, yeni değeri güncelle
         existingLike.isLiked = isLiked;
         await existingLike.save();
         return res.status(200).json({
@@ -37,13 +35,12 @@ const addOrUpdateLikedGame = async (req, res) => {
       }
     }
 
-    // Kullanıcı daha önce bu oyunu hiç beğenmemişse yeni kayıt oluştur
     const newLikedGame = new LikedGames({
       gameId,
       gameName,
       gameImage,
       isLiked,
-      userId: user.id, // Kullanıcı ile ilişkilendir
+      userId: user.id,
     });
     await newLikedGame.save();
 

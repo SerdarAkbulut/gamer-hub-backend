@@ -1,4 +1,3 @@
-const optionalAuth = require("../middleware/optionalAuth ");
 const {
   fetchGames,
   fetchReleaseDates,
@@ -9,9 +8,10 @@ const {
   upcomingGames,
 } = require("../controllers/gamesController");
 const { Router } = require("express");
+const auth = require("../middleware/auth");
 const router = Router();
 
-router.get("/games", async (req, res) => {
+router.get("/games", auth, async (req, res) => {
   try {
     const user = req.user;
     const page = parseInt(req.query.page) || 1;
@@ -23,7 +23,7 @@ router.get("/games", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/search", async (req, res) => {
+router.get("/search", auth, async (req, res) => {
   try {
     const searchQuery = req.query.q;
     const page = parseInt(req.query.page) || 1;
@@ -38,7 +38,7 @@ router.get("/search", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/gameDetails", async (req, res) => {
+router.get("/gameDetails", auth, async (req, res) => {
   try {
     const gameId = req.query.id;
     const games = await gameDetails(gameId);
@@ -63,7 +63,7 @@ router.get("/gameThemes", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/newestGames", async (req, res) => {
+router.get("/newestGames", auth, async (req, res) => {
   try {
     const user = req.user;
     const page = parseInt(req.query.page) || 1;
@@ -74,7 +74,7 @@ router.get("/newestGames", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/upcomingGames", async (req, res) => {
+router.get("/upcomingGames", auth, async (req, res) => {
   try {
     const user = req.user;
     const page = parseInt(req.query.page) || 1;

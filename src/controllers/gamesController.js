@@ -1,6 +1,7 @@
 const axios = require("axios");
 const Post = require("../models/postModel");
 const { User } = require("../models/userModel");
+const { LikedGames, favoritedGames } = require("../models");
 const getOAuthToken = async () => {
   try {
     const response = await axios.post(
@@ -25,7 +26,7 @@ const getOAuthToken = async () => {
   }
 };
 const getUserLikedGames = async (userId) => {
-  return await likedGames.findAll({
+  return await LikedGames.findAll({
     where: {
       userId: userId,
     },
@@ -57,9 +58,7 @@ const getUserFavoritedGames = async (userId) => {
 const fetchReleaseDates = async (offset = 0, userId = null) => {
   try {
     const accessToken = await getOAuthToken();
-    if (!accessToken) {
-      throw new Error("Access token alınamadı!");
-    }
+    if (!accessToken) throw new Error("Access token alınamadı!");
 
     const currentTime = Math.floor(Date.now() / 1000);
 
@@ -96,10 +95,10 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
         : "default-cover.jpg",
     }));
 
-    // Eğer kullanıcı giriş yapmışsa, onun beğendiği ve favori oyunlarını ekle
     if (userId) {
       const likedGames = await getUserLikedGames(userId);
       const favoritedGames = await getUserFavoritedGames(userId);
+
       games = games.map((game) => {
         const likedGame = likedGames.find((lg) => lg.gameId === game.id);
         const favoritedGame = favoritedGames.find(
@@ -111,15 +110,16 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
           isFavorited: favoritedGame ? favoritedGame.isFavorited : false,
         };
       });
-    }
-
-    return (games = games.map((game) => {
-      return {
+    } else {
+      // userId yoksa default değerleri ata
+      games = games.map((game) => ({
         ...game,
         isLiked: null,
         isFavorited: false,
-      };
-    }));
+      }));
+    }
+
+    return games;
   } catch (error) {
     console.error("Error:", error.message);
     return [];
@@ -129,16 +129,13 @@ const fetchReleaseDates = async (offset = 0, userId = null) => {
 const fetchGames = async (offset = 0, userId = null) => {
   try {
     const accessToken = await getOAuthToken();
-    if (!accessToken) {
-      throw new Error("Access token alınamadı!");
-    }
-    const currentTime = Math.floor(Date.now() / 1000);
+    if (!accessToken) throw new Error("Access token alınamadı!");
 
+    const currentTime = Math.floor(Date.now() / 1000);
     const requestBody = `
-      fields name,  cover.image_id; 
-      sort rating desc ;
-      where first_release_date <= ${currentTime} ;
-  
+      fields name, cover.image_id; 
+      sort rating desc;
+      where first_release_date <= ${currentTime};
       limit 24;
       offset ${offset};
     `;
@@ -162,10 +159,10 @@ const fetchGames = async (offset = 0, userId = null) => {
         : "default-cover.jpg",
     }));
 
-    // Eğer kullanıcı giriş yapmışsa, onun beğendiği ve favori oyunlarını ekle
     if (userId) {
       const likedGames = await getUserLikedGames(userId);
       const favoritedGames = await getUserFavoritedGames(userId);
+
       games = games.map((game) => {
         const likedGame = likedGames.find((lg) => lg.gameId === game.id);
         const favoritedGame = favoritedGames.find(
@@ -175,17 +172,19 @@ const fetchGames = async (offset = 0, userId = null) => {
           ...game,
           isLiked: likedGame ? likedGame.isLiked : null,
           isFavorited: favoritedGame ? favoritedGame.isFavorited : false,
+          userId: userId,
         };
       });
-    }
-
-    return (games = games.map((game) => {
-      return {
+    } else {
+      games = games.map((game) => ({
         ...game,
         isLiked: null,
         isFavorited: false,
-      };
-    }));
+        userId: userId,
+      }));
+    }
+
+    return games;
   } catch (error) {
     console.error("Error:", error.message);
     return [];
@@ -232,6 +231,8 @@ const searchGames = async (search, offset) => {
 const upcomingGames = async (offset = 0, userId = null) => {
   try {
     const accessToken = await getOAuthToken();
+    if (!accessToken) throw new Error("Access token alınamadı!");
+
     const currentTime = Math.floor(Date.now() / 1000);
 
     const requestBody = `
@@ -265,10 +266,11 @@ const upcomingGames = async (offset = 0, userId = null) => {
         : "default-cover.jpg",
     }));
 
-    // Eğer kullanıcı giriş yapmışsa, onun beğendiği ve favori oyunlarını ekle
+    // Kullanıcı giriş yapmışsa beğenileri ve favorileri ekle
     if (userId) {
       const likedGames = await getUserLikedGames(userId);
       const favoritedGames = await getUserFavoritedGames(userId);
+
       games = games.map((game) => {
         const likedGame = likedGames.find((lg) => lg.gameId === game.id);
         const favoritedGame = favoritedGames.find(
@@ -280,6 +282,13 @@ const upcomingGames = async (offset = 0, userId = null) => {
           isFavorited: favoritedGame ? favoritedGame.isFavorited : false,
         };
       });
+    } else {
+      // userId yoksa default değerleri ata
+      games = games.map((game) => ({
+        ...game,
+        isLiked: null,
+        isFavorited: false,
+      }));
     }
 
     return games;

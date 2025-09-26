@@ -67,8 +67,8 @@ function validateUpdateUser(user) {
     }),
 
     email: Joi.string().min(3).max(50).email().optional().empty("").messages({
-      "string.min": "E-posta en az 3 karakter uzunluğunda olmalıdır",
-      "string.max": "E-posta en fazla 50 karakter uzunluğunda olmalıdır",
+      "string.min": "E-posta en az 6 karakter uzunluğunda olmalıdır",
+      "string.max": "E-posta en fazla 20 karakter uzunluğunda olmalıdır",
       "string.email": "Geçerli bir e-posta adresi girin",
     }),
 
@@ -104,7 +104,6 @@ const register = async (req, res) => {
   });
   if (user) {
     return res.status(409).send({
-      error: "conflict",
       message: "E-posta veya kullanıcı adı zaten kayıtlı",
     });
   }
@@ -154,12 +153,14 @@ const login = async (req, res) => {
   try {
     let user = await User.findOne({ where: { email: req.body.email } });
     if (!user) {
-      return res.status(409).send("Böyle bir email kaydı bulunamadı");
+      return res
+        .status(409)
+        .send({ message: "Böyle bir email kaydı bulunamadı" });
     }
 
     const isSuccess = await bcrypt.compare(req.body.password, user.password);
     if (!isSuccess) {
-      return res.status(409).send("Şifre hatalı");
+      return res.status(409).send({ message: "Şifre hatalı" });
     }
 
     const payload = { id: user.id, email: user.email };
@@ -167,7 +168,9 @@ const login = async (req, res) => {
       expiresIn: "30d",
     });
 
-    return res.header("Authorization", token).json({ token });
+    return res
+      .header("Authorization", `Bearer ${token}`)
+      .json({ token: `Bearer ${token}` });
   } catch (error) {
     return res.status(500).send("Sunucu hatası: " + error.message);
   }
@@ -183,7 +186,7 @@ const updateUser = async (req, res) => {
   });
 
   if (!user) {
-    return res.status(404).send("Kullanıcı bulunamadı");
+    return res.status(404).send({ message: "Kullanıcı bulunamadı" });
   }
 
   if (req.body.password && req.body.password.trim() !== "") {
