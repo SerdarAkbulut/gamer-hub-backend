@@ -267,8 +267,6 @@ const upcomingGames = async (offset = 0, userId = null) => {
       fields name, cover.image_id;
       sort first_release_date asc;
       where first_release_date > ${currentTime}
-      & platforms = (6, 48, 167, 9, 49, 169, 12)
-      & category = 0
       & version_parent = null
       & themes != 42;
       limit 24;
@@ -322,7 +320,7 @@ const upcomingGames = async (offset = 0, userId = null) => {
     return games;
   } catch (error) {
     console.error("Error:", error.message);
-    return [];
+    return error.message;
   }
 };
 const gameDetails = async (gameId) => {
